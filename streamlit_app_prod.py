@@ -7,13 +7,7 @@ import streamlit as st
 import tensorflow as tf
 
 warnings.filterwarnings('ignore')
-# st.write(""" Covid Detection""")
 
-# load the model from disk
-
-# filename = 'C:\\Users\\jairama\\IdeaProjects\\Coswara-Data\\covid_sound_model_1.sav'
-# file = open(filename, 'rb')
-# print(file)
 model = tf.keras.models.load_model('covid_sound_model')
 
 
@@ -31,29 +25,37 @@ def extract_features(file):
 if __name__ == '__main__':
 
     st.title('Covid-19 Audio data Detection')
+    st.markdown("This application detects the Covid-19 infection in a person based on the provided speech sample.\n"
+                "The speech sample can be of *breathing, coughing, counting numbers 0-9 or reciting vowels*.")
 
-    uploaded_file = st.file_uploader('Upload .wav file')
-
+    uploaded_file = st.file_uploader("Please upload .wav file with person's speech or cough sounds.")
     if not uploaded_file:
         st.warning("Please upload an audio wav file before proceeding!")
         st.stop()
     else:
-        # Decode audio and Predict Right Class
-        # audio_sample = uploaded_file.name
-        extracted_ft = extract_features(io.BytesIO(uploaded_file.read()))
+        with st.spinner('Analysing the audio...'):
+            # Decode audio and Predict Right Class
+            # audio_sample = uploaded_file.name
+            audio_bytes = io.BytesIO(uploaded_file.read())
+            st.audio(audio_bytes)
+            extracted_ft = extract_features(audio_bytes)
 
-        if extracted_ft == 'failed':
-            st.warning("There was an error reading audio file!")
-            st.stop()
+            if extracted_ft == 'failed':
+                st.warning("There was an error reading audio file!")
+                st.stop()
 
-        pred = model.predict(extracted_ft.reshape(1, 40))
+            pred = model.predict(extracted_ft.reshape(1, 40))
 
-        reshaped = pred.reshape((1,))
-        T = 0.6
-        y_pred_bool = reshaped >= T
+            reshaped = pred.reshape((1,))
+            T = 0.6
+            y_pred_bool = reshaped >= T
 
         st.title('Results')
-        if y_pred_bool:
-            st.write("This audio is predicted to be of Covid-19 positive person")
-        else:
-            st.write("This audio is predicted to be of Covid-19 negetive person")
+
+        pred_str = "positive" if y_pred_bool else "negative"
+        pred_acc = reshaped[0] if y_pred_bool else 1 - reshaped[0]
+
+        pred_acc_percent = int(pred_acc * 100)
+        st.info(
+            "This audio is predicted to be of Covid-19 " + pred_str + " person with " + str(
+                pred_acc_percent) + "% accuracy.")
