@@ -25,15 +25,15 @@ def extract_features(file):
 if __name__ == '__main__':
 
     st.title('Covid-19 Audio data Detection')
-    st.markdown("This application detects the Covid-19 infection in a person based on the provided speech sample.\n"
-                "The speech sample can be of *breathing, coughing, counting numbers 0-9 or reciting vowels*.")
+    st.markdown("This application detects the Covid-19 infection in a person based on the provided speech sample.")
+    st.markdown("The speech sample can be of ***breathing, coughing, counting numbers 0-9 or reciting vowels***.")
 
-    uploaded_file = st.file_uploader("Please upload .wav file with person's speech or cough sounds.")
+    uploaded_file = st.file_uploader("")
     if not uploaded_file:
-        st.warning("Please upload an audio wav file before proceeding!")
+        st.warning("Please upload .wav file with person's speech or cough sounds before proceeding!")
         st.stop()
     else:
-        with st.spinner('Analysing the audio...'):
+        with st.spinner('Reading the sample...'):
             # Decode audio and Predict Right Class
             # audio_sample = uploaded_file.name
             audio_bytes = io.BytesIO(uploaded_file.read())
@@ -44,18 +44,19 @@ if __name__ == '__main__':
                 st.warning("There was an error reading audio file!")
                 st.stop()
 
+        with st.spinner('Analysing the sample...'):
             pred = model.predict(extracted_ft.reshape(1, 40))
 
             reshaped = pred.reshape((1,))
             T = 0.6
             y_pred_bool = reshaped >= T
 
-        st.title('Results')
+        st.header('Result')
 
         pred_str = "positive" if y_pred_bool else "negative"
         pred_acc = reshaped[0] if y_pred_bool else 1 - reshaped[0]
 
         pred_acc_percent = int(pred_acc * 100)
-        st.info(
-            "This audio is predicted to be of Covid-19 " + pred_str + " person with " + str(
+        st.success(
+            "This sample is predicted to be of **Covid-19 " + pred_str + "** person with " + str(
                 pred_acc_percent) + "% accuracy.")
