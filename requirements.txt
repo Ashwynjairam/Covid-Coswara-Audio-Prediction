@@ -6,7 +6,6 @@ attrs==22.1.0
 audioread==3.0.0
 blinker==1.5
 cachetools==5.2.0
-certifi @ file:///C:/b/abs_ac29jvt43w/croot/certifi_1665076682579/work/certifi
 cffi==1.15.1
 charset-normalizer==2.1.1
 click==8.1.3
